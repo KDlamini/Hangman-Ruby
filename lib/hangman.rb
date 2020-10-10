@@ -169,7 +169,7 @@ class Game
 
     #Display results
     def display()
-        print "\n                                                      Save and Exit: press 1\n"
+        print "\n                  Save and Exit: press 1\n"
         print "\nLength of word: #{@secret_word.length} \n"
         print "\n--------------------------------------------------\n\n".send(:yellow)
         puts "          Word   :".send(:brown).send(:bold) + " #{@matched_letters} " .upcase.send(:green).send(:bold)
