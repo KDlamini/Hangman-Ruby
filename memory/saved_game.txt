@@ -1,1 +1,0 @@
-{"secret_word":"destroy","matched_letters":"_e___o_","guess":"u","incorrect_guess_count":3,"misses":"a, i, u"}

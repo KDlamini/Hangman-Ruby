@@ -1,4 +1,5 @@
 require_relative 'colors'
+require 'csv'
 require 'json'
 
 module Container
@@ -25,17 +26,17 @@ module Container
     end
 
     #Save game and exit
-    def save_and_exit(secret_word, matched_letters, guess, incorrect_guess_count, misses)
+    def save_and_exit(secret_word, matched_letters, guess, guesses_left, misses)
         memory_hash = {
             secret_word: secret_word,
             matched_letters: matched_letters,
             guess: guess,
-            incorrect_guess_count: incorrect_guess_count, 
+            guesses_left: guesses_left, 
             misses: misses
         }
 
         Dir.mkdir("memory") unless Dir.exists?("memory")
-        filename = "memory/saved_game.txt"
+        filename = "memory/saved_game.csv"
       
         File.open(filename,'w') do |file|
           file.puts JSON.generate(memory_hash)
@@ -44,7 +45,7 @@ module Container
 
     #Parse saved data and continue with game
     def get_saved_game
-        data = File.read("memory/saved_game.txt")
+        data = File.read("memory/saved_game.csv")
         data = JSON.parse(data)
         hangman = Game.new
 
@@ -56,8 +57,8 @@ module Container
                 hangman.matched_letters = value
             when "guess"
                 hangman.guess = value
-            when "incorrect_guess_count"
-                hangman.incorrect_guess_count = value
+            when "guesses_left"
+                hangman.guesses_left = value
             when "misses"
                 hangman.misses = value
             else
@@ -70,7 +71,7 @@ module Container
 
     #Clear saved data
     def clear_memory
-        File.delete("memory/saved_game.txt")
+        File.delete("memory/saved_game.csv")
     end
 
     #clear screen
@@ -82,7 +83,7 @@ end
 class Game
     include Container
     attr_accessor :number_of_guesses, :secret_word, :matched_letters, 
-                  :guess, :incorrect_guess_count, :misses
+                  :guess, :guesses_left, :misses
     @@words = File.read("5desk.txt")
 
     def initialize
@@ -92,7 +93,7 @@ class Game
         @matched_letters = "_" * @secret_word.length
         @matched = false
         @guess = ""
-        @incorrect_guess_count = 0
+        @guesses_left = @number_of_guesses
         @misses = ""
     end
     def play
@@ -138,7 +139,7 @@ class Game
 
         if input.to_i == 1
 
-            self.save_and_exit(@secret_word, @matched_letters, @guess, @incorrect_guess_count, @misses)
+            self.save_and_exit(@secret_word, @matched_letters, @guess, @guesses_left, @misses)
             print "\n\n                    Goodbye!!!                     \n\n".send(:yellow).send(:bold)
 
         elsif is_input_valid?(input)
@@ -176,7 +177,7 @@ class Game
         puts "          Guess  :".send(:brown).send(:bold)  + " #{@guess} "          .upcase.send(:yellow).send(:bold) 
         puts "          Misses :".send(:brown).send(:bold)  + " #{@misses} "         .upcase.send(:red).send(:bold)
         print "\n"
-        print "          Incorrect guesses:".send(:brown).send(:bold)  + " #{@incorrect_guess_count} \n\n" .send(:red).send(:bold)
+        print "          Guesses left:".send(:brown).send(:bold)  + " #{@guesses_left} \n\n" .send(:red).send(:bold)
         print "--------------------------------------------------\n\n".send(:yellow)
     end
 
@@ -195,7 +196,7 @@ class Game
         end
 
         if !@matched
-            @incorrect_guess_count += 1
+            @guesses_left -= 1
             @misses += ", " unless @misses == ""
             @misses += input
         end
@@ -235,7 +236,7 @@ class Game
 
     #Check if player has reached the number of guesses
     def is_game_over?
-        @incorrect_guess_count == @number_of_guesses ? true : false
+        @guesses_left == 0 ? true : false
     end
 end
 
