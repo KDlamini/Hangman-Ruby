@@ -106,7 +106,7 @@ class Game
         puts "Guess the secret word by suggesting a letter within #{@number_of_guesses} number of guesses."
         sleep 1
         display()
-        player_input()
+        prompt_player()
     end
 
     def resume?
@@ -123,7 +123,7 @@ class Game
                 self.clear()
                 hangman = self.get_saved_game()
                 hangman.display()
-                hangman.player_input()
+                hangman.prompt_player()
             when "n"
                 self.clear_memory()
                 load_game()
@@ -133,7 +133,7 @@ class Game
         end
     end
 
-    def player_input
+    def prompt_player
         puts "Enter a single character [a-z/A-Z]:"
         input = gets.chomp.downcase
 
@@ -159,11 +159,11 @@ class Game
                 self.clear_memory() unless Dir.empty? "memory"
                 play_again?()
             else
-                player_input()
+                prompt_player()
             end
         else
             print "\n------------------Invalid Input-------------------\n".send(:red).send(:bold)
-            player_input()
+            prompt_player()
         end
     end
 
@@ -213,7 +213,7 @@ class Game
             self.clear()
             hangman = Game.new
             hangman.display()
-            hangman.player_input()
+            hangman.prompt_player()
         when "n"
             print "\n\n                    Goodbye!!!                     \n\n".send(:yellow).send(:bold)
         else
