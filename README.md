@@ -5,3 +5,6 @@
 *see* [Wikipedia](https://en.wikipedia.org/wiki/Hangman_(game)) *for more info.*
 
 This project is part of [The Odin Project](https://www.theodinproject.com/courses/ruby-programming/lessons/file-i-o-and-serialization-ruby-programming).
+
+## Live Preview
+[![Run on Repl.it](https://repl.it/badge/github/KDlamini/Hangman-Ruby)](https://repl.it/github/KDlamini/Hangman-Ruby)
