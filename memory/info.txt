@@ -1,0 +1,2 @@
+This folder saves all the information or data that is saved from the game.
+When the player loads the game again they should be prompted on whether they wish to continue or restart.

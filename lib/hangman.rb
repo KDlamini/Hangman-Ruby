@@ -110,7 +110,7 @@ class Game
     end
 
     def resume?
-        if (Dir.empty? "memory")
+        if !(File.exists? "memory/saved_game.csv")
             load_game()
         else
             self.clear()
