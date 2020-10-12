@@ -1,84 +1,7 @@
 require_relative 'colors'
+require_relative 'module_container'
 require 'csv'
 require 'json'
-
-module Container
-    #Create an array of words between 5 and 12 from our dictionary
-    def filter_words(words)
-
-        filtered_words = Array.new
-        words_array = words.split()
-
-        words_array.each do |word|
-            if word.length >= 5 && word.length <= 12
-                filtered_words.push(word)
-            end
-        end
-
-        filtered_words
-    end
-
-    #Create secret word from a list of words between 5 and 12
-    def generate_secret_word(filtered_words)
-        size = filtered_words.size
-        
-        secret_word = filtered_words[rand(size)]
-    end
-
-    #Save game and exit
-    def save_and_exit(secret_word, matched_letters, guess, guesses_left, misses)
-        memory_hash = {
-            secret_word: secret_word,
-            matched_letters: matched_letters,
-            guess: guess,
-            guesses_left: guesses_left, 
-            misses: misses
-        }
-
-        Dir.mkdir("memory") unless Dir.exists?("memory")
-        filename = "memory/saved_game.csv"
-      
-        File.open(filename,'w') do |file|
-          file.puts JSON.generate(memory_hash)
-        end
-    end
-
-    #Parse saved data and continue with game
-    def get_saved_game
-        data = File.read("memory/saved_game.csv")
-        data = JSON.parse(data)
-        hangman = Game.new
-
-        data.each do |(key, value)|
-            case key
-            when "secret_word"
-                hangman.secret_word = value
-            when "matched_letters"
-                hangman.matched_letters = value
-            when "guess"
-                hangman.guess = value
-            when "guesses_left"
-                hangman.guesses_left = value
-            when "misses"
-                hangman.misses = value
-            else
-                puts "something went wrong..."
-            end
-        end
-
-        hangman
-    end
-
-    #Clear saved data
-    def clear_memory
-        File.delete("memory/saved_game.csv")
-    end
-
-    #clear screen
-    def clear
-        print "\e[2J\e[f"
-    end
-end
 
 class Game
     include Container
@@ -110,9 +33,8 @@ class Game
     end
 
     def resume?
-        if !(File.exists? "memory/saved_game.csv")
-            load_game()
-        else
+        #Call method that that checks for saved game file
+        if self.is_game_saved?()
             self.clear()
             print "\n\nDo you wish to resume game? Y/N:\n"
             input = gets.chomp.downcase
@@ -130,9 +52,12 @@ class Game
             else
                 resume?()
             end
+        else
+            load_game()
         end
     end
 
+    #Get player guess input and validate
     def prompt_player
         puts "Enter a single character [a-z/A-Z]:"
         input = gets.chomp.downcase
@@ -145,18 +70,18 @@ class Game
         elsif is_input_valid?(input)
             self.clear()
             @guess = input
-            check_for_matches(input    )
+            check_for_matches(input)
             display()
     
             if is_win?()
                 print "                Congratulations!!!                \n".send(:green).send(:bold)
                 print "            You Guessed The Secret Word           \n\n"
-                self.clear_memory() unless Dir.empty? "memory"
+                self.clear_memory() unless !self.is_game_saved?()
                 play_again?()
             elsif is_game_over?()
                 print "                   Game Over!!!                   \n\n".send(:yellow).send(:bold)
                 print "The secret word is: " + "#{@secret_word} \n\n"    .upcase.send(:bold).send(:green)
-                self.clear_memory() unless Dir.empty? "memory"
+                self.clear_memory() unless !self.is_game_saved?()
                 play_again?()
             else
                 prompt_player()
@@ -222,7 +147,7 @@ class Game
         end
     end
 
-    #Check if user input meets our requirements
+    #Check if user input meets game requirements
     def is_input_valid?(input)
         if input.length == 1
             (input.ord >= 97 && input.ord <=122) ? true : false
